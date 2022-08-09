@@ -186,6 +186,13 @@
                 <version>${ruoyi.version}</version>
             </dependency>
 
+            <!--md-->
+            <dependency>
+                <groupId>com.ruoyi</groupId>
+                <artifactId>kalipy-md</artifactId>
+                <version>${ruoyi.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -196,6 +203,7 @@
         <module>ruoyi-quartz</module>
         <module>ruoyi-generator</module>
         <module>ruoyi-common</module>
+        <module>kalipy-md</module>
     </modules>
     <packaging>pom</packaging>
 

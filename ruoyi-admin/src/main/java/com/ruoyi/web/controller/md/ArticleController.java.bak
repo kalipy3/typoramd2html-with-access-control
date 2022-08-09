@@ -1,0 +1,161 @@
+package com.ruoyi.web.controller.md;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+class ArticleData {
+    private int id;
+    private int pid;
+    private String level;
+    private String label;
+    private String content;
+    private List<ArticleData> children;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getPid() {
+        return pid;
+    }
+
+    public void setPid(int pid) {
+        this.pid = pid;
+    }
+
+    public String getLevel() {
+        return level;
+    }
+
+    public void setLevel(String level) {
+        this.level = level;
+    }
+
+    public String getLabel() {
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public List<ArticleData> getChildren() {
+        return children;
+    }
+
+    public void setChildren(List<ArticleData> children) {
+        this.children = children;
+    }
+
+    @Override
+    public String toString() {
+        return "ArticleData{" +
+            "id = " + getId() +
+            ", pid = " + getPid() +
+            ", level = " + getLevel() +
+            ", label = " + getLabel() +
+            ", content = " + getContent() +
+            ", children = " + getChildren() +
+            "}";
+    }
+
+    public ArticleData(int id, int pid, String level, String label, String content, List<ArticleData> children) {
+        this.id = id;
+        this.pid = pid;
+        this.level = level;
+        this.label = label;
+        this.content = content;
+        this.children = children;
+    }
+
+}
+
+
+
+@RestController
+public class ArticleController {
+    List<ArticleData> arr = new ArrayList<>();
+
+    //@Autowired
+    //private userservice UsersService;
+
+    //@PostMapping("/article")
+    //public List article() {
+
+    //    //return UsersService.findall();
+    //}
+    /*
+     * 第五种：以JSON对象接收
+     * {"username": "zhangsan","id":"2","role":{"rolename":"admin"}}
+     * */
+    @RequestMapping(value = "/article",method= RequestMethod.POST)
+    public String article(@RequestBody JSONArray json) throws Exception{
+        System.out.println("7777777" + json);    
+        List<ArticleData> list = json.toJavaList(ArticleData.class);
+        System.out.println(list.get(0).getChildren().size());
+        System.out.println("-------------");
+        for (int i = 0; i < list.size(); i++) {
+            System.out.println(list.get(i));
+
+        }
+
+        System.out.println("-----------------------------");
+        dfs(list);
+        for (int i = 0; i < arr.size(); i++) {
+            System.out.println(arr.get(i)); 
+        }
+
+
+
+        //{"id":2,"pid":-1,"level":"3","label":"222","content":"<h3><a name=\"222\" class=\"md-header-anchor\"></a><span>222</span></h3><hr />","children":[]}
+
+        //System.out.println("id:"+json.getString("id"));    
+        //System.out.println("content:"+json.getString("content"));    
+        //System.out.println("rolename:"+json.getJSONObject("role").getString("rolename"));
+        return "ok";
+    }
+
+    public void dfs(List<ArticleData> list) {
+        for (int i = 0; i < list.size(); i++) {
+            ArticleData node = (ArticleData)list.get(i);
+            //System.out.println("aaa:" + node.getId());
+
+            ArticleData chapter = new ArticleData(node.getId(), node.getPid(), node.getLevel(), node.getLabel(), node.getContent(), null);
+            arr.add(chapter);
+            if (list.get(i).getChildren().size() != 0) {
+                System.out.println("tt+" + i + list.get(i).getChildren().get(0).getId());
+                //HashMap<String, Object> map = (HashMap<String, Object>)list.get(i).getChildren();
+                //System.out.println("---hahsmap:" + i);
+                //for (Map.Entry < String, Object> entry : map.entrySet()) {  
+                //    System.out.println(entry.getKey());  
+                //    System.out.println(entry.getValue());  
+                //} 
+
+
+                //dfs(list.get(i).getChildren());
+            }
+        }
+    }
+}

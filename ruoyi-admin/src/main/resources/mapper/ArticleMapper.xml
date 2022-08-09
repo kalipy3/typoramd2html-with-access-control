@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.web.controller.md.service.mapper.ArticleMapper">
+    <insert id="insertArticle" parameterType = "map" useGeneratedKeys = "true" keyProperty = "articleId">
+        insert into article (title) VALUES (#{title});
+    </insert>
+
+    <insert id="insertArticleMenu" parameterType = "map">
+        insert into article_menu (data, article_id) VALUES (#{data}, #{articleId});
+    </insert>
+
+    <insert id="insertArticleBatch" parameterType="java.util.List">
+        insert into article_chapter (chapter_id, content, permission, article_id) VALUES 
+            <foreach collection ="list" item="chapter" separator =",">
+                (#{chapter.id}, #{chapter.content}, #{chapter.permission}, #{chapter.articleId})
+            </foreach>
+    </insert>
+
+
+
+    <resultMap type="com.ruoyi.web.controller.md.service.entity.Paper" id="paper">
+        <result column="article_id" property="articleId"/>
+    </resultMap>
+    <select id="selectArticleList" resultMap = "paper">
+        select * from article
+    </select>
+
+    <resultMap type="com.ruoyi.web.controller.md.service.entity.ArticleMenu" id="articleMenu">
+        <result column="article_id" property="articleId"/>
+    </resultMap>
+    <select id="selectArticleMenu" resultMap = "articleMenu">
+        select * from article_menu where id = #{articleId}
+    </select>
+
+    <resultMap type="com.ruoyi.web.controller.md.service.entity.Article" id="chapters">
+        <result column="article_id" property="articleId"/>
+        <result column="chapter_id" property="id"/>
+    </resultMap>
+    <select id="selectArticleChapterList" resultMap = "chapters">
+        select chapter_id, permission from article_chapter where article_id = #{articleId}
+    </select>
+
+
+    <select id="selectChapterContent" resultType = "string" parameterType = "map">
+        select content from article_chapter where article_id = #{articleId} and chapter_id = #{chapterId} and permission >= #{permission}
+    </select>
+
+</mapper> 

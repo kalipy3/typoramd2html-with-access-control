@@ -76,6 +76,9 @@ Vue.use(Element, {
   size: Cookies.get('size') || 'medium' // set element-ui default size
 })
 
+//import axios from 'axios';
+//Vue.prototype.$axios = axios;
+
 Vue.config.productionTip = false
 
 new Vue({
