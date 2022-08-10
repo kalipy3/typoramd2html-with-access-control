@@ -287,6 +287,75 @@ export default {
                     id: i + 1,
                     no: data2[i].no,
                     level: data2[i].level,
+                    label: data2[i].title
+                }
+                arr.push(obj)
+            }
+
+            let arr2 = []
+            let pid = -1
+            var stack = []
+            //单调栈：找到每个节点左边第一个比其小的节点(即找到每个节点的父节点)
+            for (let i = 0; i < arr.length; i++) {
+                while (stack.length != 0 && arr[i].level <= arr[stack[stack.length-1]].level) {
+                    pid = arr[stack[stack.length-1]].id
+                    stack.pop()
+                }
+                if (stack.length == 0) {
+                    pid = -1
+                } else {
+                    pid = arr[stack[stack.length-1]].id
+                }
+                stack.push(i)
+
+                let obj = {
+                    id: arr[i].id,
+                    pid: pid,
+                    no: arr[i].no,
+                    level: arr[i].level,
+                    label: arr[i].label,
+                    children: []
+                }
+                arr2.push(obj)
+            }
+
+            for (let i = 0; i < arr2.length; i++) {
+                //console.log(arr2[i])
+            }
+
+
+            let map = new Map()
+            for (let i = 0; i < arr2.length; i++) {
+                map.set(arr2[i].id, arr2[i])
+            }
+
+            let arr3 = []
+            for (let i = 0; i < arr2.length; i++) {
+                let obj = arr2[i]
+                let obj2 = map.get(obj.pid)
+                if (obj2 == null || obj2 == undefined || obj.pid == -1) {
+                    arr3.push(obj)
+                } else {
+                    map.get(obj.pid).children.push(obj)
+                }
+            }
+
+            //this.data = arr3
+            return arr3
+        },
+        adapter2(data) {
+
+            //console.log(data)
+            if (data.length <= 0) return
+
+            let data2 = this.addNo(data)//给章节加上编号
+
+            let arr = []
+            for (let i = 0; i < data2.length; i++) {
+                let obj = {
+                    id: i + 1,
+                    no: data2[i].no,
+                    level: data2[i].level,
                     label: data2[i].title,
                     content: data2[i].html
                 }
@@ -342,74 +411,6 @@ export default {
                 }
             }
 
-            //this.data = arr3
-            return arr3
-        },
-        adapter2(data) {
-            //console.log(data)
-            if (data.length <= 0) return
-
-            let arr = []
-            for (let i = 0; i < data.length; i++) {
-                let obj = {
-                    id: i + 1,
-                    level: data[i].level,
-                    label: data[i].title,
-                    content: data[i].html
-                }
-                arr.push(obj)
-            }
-
-            let arr2 = []
-            let pid = -1
-            let m = new Map()//level:id
-            for (let i = 0; i < arr.length; i++) {
-                m.set(arr[i].level, arr[i].id)
-                let j;
-                for (j = i - 1; j >= 0; j--) {
-                    if (arr[j].level != undefined && arr[j].level < arr[i].level)
-                    {
-                        break;
-                    }
-                }
-                if (j == -1)
-                    pid = -1
-                else
-                {
-                    pid = m.get(arr[j].level)
-                }
-
-                let obj = {
-                    id: arr[i].id,
-                    pid: pid,
-                    level: arr[i].level,
-                    label: arr[i].label,
-                    content: arr[i].content,
-                    children: []
-                }
-                arr2.push(obj)
-            }
-
-            for (let i = 0; i < arr2.length; i++) {
-                //console.log(arr2[i])
-            }
-
-
-            let map = new Map()
-            for (let i = 0; i < arr2.length; i++) {
-                map.set(arr2[i].id, arr2[i])
-            }
-
-            let arr3 = []
-            for (let i = 0; i < arr2.length; i++) {
-                let obj = arr2[i]
-                let obj2 = map.get(obj.pid)
-                if (obj2 == null || obj2 == undefined || obj.pid == -1) {
-                    arr3.push(obj)
-                } else {
-                    map.get(obj.pid).children.push(obj)
-                }
-            }
             this.data = arr3
         },
         addNo(data) {
