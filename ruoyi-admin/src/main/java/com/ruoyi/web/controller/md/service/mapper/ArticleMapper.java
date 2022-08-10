@@ -20,5 +20,5 @@ public interface ArticleMapper
     public ArticleMenu selectArticleMenu(int articleId);
     public List<Article> selectArticleChapterList(int articleId);
 
-    public String selectChapterContent(Map<String, Object> map);
+    public Article selectChapterContent(Map<String, Object> map);
 }

@@ -16,7 +16,7 @@ public class ArticleUtil {
     public static void dfs(List<Article> res, List<Article> list) {
         for (int i = 0; i < list.size(); i++) {
             Article node = (Article)list.get(i);
-            Article chapter = new Article(node.getId(), node.getPid(), node.getLevel(), node.getLabel(), node.getContent(), null);
+            Article chapter = new Article(node.getId(), node.getPid(), node.getLevel(), node.getNo(), node.getLabel(), node.getContent(), null);
             res.add(chapter);
             if (list.get(i).getChildren().length != 0) {
                 dfs(res, Arrays.asList(list.get(i).getChildren()));

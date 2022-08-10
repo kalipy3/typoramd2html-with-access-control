@@ -24,7 +24,7 @@
                         </el-tree>
                 </el-aside>
                 <el-main>
-                    <div v-html="htmlView">
+                    <div class="htmlView" v-html="htmlView">
                     </div>
                 </el-main>
 
@@ -68,6 +68,7 @@ import request from '../../../utils/request'
 export default {
     data() {
         return {
+            chapterNo: "",
             userRoleId: 999999,//反正一个超大的数即可
             paper: [],
             curArticleId: 1,
@@ -169,16 +170,19 @@ export default {
             this.curArticleTitle = this.paper[0].title.substring(0, this.paper[0].title.length - 5)
         },
         async handleNodeClick(data) {
+            let that = this
             console.log(data)
             //请求服务端articleId + text_id + permission(前端没有直接不请求后端) --> mysql(前端有权限后端再次进行验证permission:admin) -->  对应html章节片段
             let chapterId = data.id//被点击的章节的id
-            await this.getChapterContent(this.curArticleId, chapterId)
-            this.htmlView=data.content//mysql返回context html章节片段，前端展示
+            await this.getChapterContent(this.curArticleId, chapterId)//getChapterContent必须return，不然await不起作用
+            //this.htmlView=data.content//mysql返回context html章节片段，前端展示
 
             //nextTick才能获取动态的dom元素
             this.$nextTick(function() {
+                //let title = document.querySelector("#" + data.label + ' > span:nth-child(1)')
                 let title = document.querySelector(".el-main > div:nth-child(1) span:nth-child(1)")
-                title.innerText = data.no + " " + data.label
+                if (title != null)
+                    title.innerText = that.chapterNo + " " + data.label
             })
         },
         printMenu(data) {
@@ -521,12 +525,15 @@ export default {
         },
         getChapterContent(articleId, chapterId) {
             let that = this
-            request({
+            return request({
               url: '/article/' + articleId + '/chapter/' + chapterId,
               method: 'get'
             }).then(response => {
                 console.log("getChapterContent() resp:"+ response)
-                that.htmlView = response
+                that.htmlView = response.content
+                that.chapterNo = response.no
+                console.log("no:"+that.chapterNo)
+                console.log("htmlView:"+that.htmlView)
                 if (response.length == 0) {
                     console.log("权限不足")
                     that.$modal.msgError("权限不足！请登录或成为vip用户！！");

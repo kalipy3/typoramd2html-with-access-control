@@ -4,6 +4,7 @@ public class Article {
     private int id;
     private int pid;
     private String level;
+    private String no;
     private String label;
     private String content;
     private int permission;
@@ -12,10 +13,11 @@ public class Article {
 
     public Article() {}
 
-    public Article(int id, int pid, String level, String label, String content, int permission, int articleId, Article[] children) {
+    public Article(int id, int pid, String level, String no, String label, String content, int permission, int articleId, Article[] children) {
         this.id = id;
         this.pid = pid;
         this.level = level;
+        this.no = no;
         this.label = label;
         this.content = content;
         this.permission = permission;
@@ -23,10 +25,11 @@ public class Article {
         this.children = children;
     }
 
-    public Article(int id, int pid, String level, String label, String content, Article[] children) {
+    public Article(int id, int pid, String level, String no, String label, String content, Article[] children) {
         this.id = id;
         this.pid = pid;
         this.level = level;
+        this.no = no;
         this.label = label;
         this.content = content;
         this.children = children;
@@ -54,6 +57,14 @@ public class Article {
 
     public void setLevel(String level) {
         this.level = level;
+    }
+
+    public String getNo() {
+        return no;
+    }
+
+    public void setNo(String no) {
+        this.no = no;
     }
 
     public String getLabel() {
@@ -102,6 +113,7 @@ public class Article {
             "id = " + id +
             ", pid = " + pid +
             ", level = " + level +
+            ", no = " + no +
             ", label = " + label +
             ", content = " + content +
             ", permission = " + permission +

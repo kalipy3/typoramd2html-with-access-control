@@ -12,9 +12,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </insert>
 
     <insert id="insertArticleBatch" parameterType="java.util.List">
-        insert into article_chapter (chapter_id, content, permission, article_id) VALUES 
+        insert into article_chapter (chapter_id, no, content, permission, article_id) VALUES 
             <foreach collection ="list" item="chapter" separator =",">
-                (#{chapter.id}, #{chapter.content}, #{chapter.permission}, #{chapter.articleId})
+                (#{chapter.id}, #{chapter.no}, #{chapter.content}, #{chapter.permission}, #{chapter.articleId})
             </foreach>
     </insert>
 
@@ -43,8 +43,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
 
-    <select id="selectChapterContent" resultType = "string" parameterType = "map">
-        select content from article_chapter where article_id = #{articleId} and chapter_id = #{chapterId} and permission >= #{permission}
+    <resultMap type="com.ruoyi.web.controller.md.service.entity.Article" id="content">
+        <result column="content" property="content"/>
+        <result column="no" property="no"/>
+    </resultMap>
+    <select id="selectChapterContent" resultMap = "content" parameterType = "map">
+        select content, no from article_chapter where article_id = #{articleId} and chapter_id = #{chapterId} and permission >= #{permission}
     </select>
 
 </mapper> 

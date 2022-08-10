@@ -19,5 +19,5 @@ public interface IArticleService
     public ArticleMenu selectArticleMenu(int articleId);
     public List<Article> selectArticleChapterList(int articleId);
 
-    public String selectChapterContent(int articleId, int chapterId);
+    public Article selectChapterContent(int articleId, int chapterId);
 }

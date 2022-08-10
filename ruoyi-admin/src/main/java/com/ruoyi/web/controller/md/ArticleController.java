@@ -57,7 +57,7 @@ public class ArticleController {
     }
 
     @RequestMapping(value = "/article/{articleId}/chapter/{chapterId}", method= RequestMethod.GET)
-    public String selectChapterContent(@PathVariable("articleId") int articleId, @PathVariable("chapterId") int chapterId) {
+    public Article selectChapterContent(@PathVariable("articleId") int articleId, @PathVariable("chapterId") int chapterId) {
         return articleService.selectChapterContent(articleId, chapterId);
     }
 

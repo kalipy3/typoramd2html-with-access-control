@@ -100,7 +100,7 @@ public class ArticleServiceImpl implements IArticleService
     }
 
     @Override
-    public String selectChapterContent(int articleId, int chapterId) {
+    public Article selectChapterContent(int articleId, int chapterId) {
         //权限控制
         //1.后端的admin、commn等角色转换成我们需要的persssion:/*1:admin;2:vip;3:login;4:visitor;*/
         //2.select content from table where aritcle_id = 1 and chapter_id = 1 and permission >= 1
