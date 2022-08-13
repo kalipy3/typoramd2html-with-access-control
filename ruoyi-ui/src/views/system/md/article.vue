@@ -1,13 +1,57 @@
 <template>
-    <div>
+
+    <div class="markdown-body" id="write">
+
+
+        <!--
+
+        <div>
+                <sidebar-item
+                    :data="data"
+                    ></sidebar-item>
+        </div>
+
+        -->
+
+        <!--
+    <div style="width: 200px;" :style="{ backgroundColor: settings.sideTheme === 'theme-dark' ? variables.menuBackground : variables.menuLightBackground }">
+        <el-scrollbar  style="width: 200px;" :class="settings.sideTheme" wrap-class="scrollbar-wrapper">
+            <el-menu
+                :default-active="activeMenu"
+                :collapse="isCollapse"
+                :background-color="settings.sideTheme === 'theme-dark' ? variables.menuBackground : variables.menuLightBackground"
+                :text-color="settings.sideTheme === 'theme-dark' ? variables.menuColor : variables.menuLightColor"
+                :unique-opened="true"
+                :active-text-color="settings.theme"
+                :collapse-transition="false"
+                mode="vertical"
+            >
+                <sidebar-item
+                    v-for="(item, index) in data"
+                    :key="item.id"
+                    :data="item"
+                    :base-path="item.id"
+                />
+            </el-menu>
+        </el-scrollbar>
+    </div>
+
+
+
+
+
+
         <div class="file">
             文章上传测试(请上传typora md转换后的html文章)
             <input type="file"  @change="uploadFile($event)" >
         </div>
+            -->
         <el-container v-if="isShow">
+            <!--
             <el-header height="33px">{{curArticleTitle}}</el-header>
+            -->
             <el-container>
-                <el-aside width="auto">
+                <el-aside width="auto" v-bind:style="{'background-color': variables.menuBackground, 'margin-bottom': '0px'}">
                     <!--<ul>
                         <li v-on:click="aClick(item)" v-for="item in data">
                         <el-link>{{item.label}}</el-link>
@@ -15,27 +59,70 @@
                         </ul>-->
 
                         <!--<el-tree :data="data" :highlight-current=true :props="defaultProps" @node-click="handleNodeClick"></el-tree>-->
-                        <el-tree :data="data" :highlight-current=true :props="defaultProps" @node-click="handleNodeClick">
-                            <span slot-scope="{node, data}">
-                                <span v-bind:style="{'color': data.id == 1 || data.id==2 || data.id==3 ? '': ''}">{{data.no}} {{data.label}}</span>
+
+                        <el-input
+                            size="mini"
+                          placeholder="输入章节名过滤"
+                          v-model="filterChapter">
+                        </el-input>
+                        <el-tree v-bind:style="{'background-color': variables.menuBackground, 'color': 'rgb(191, 203, 217)'}" :data="data" :highlight-current=false :props="defaultProps" @node-click="handleNodeClick"   :filter-node-method="filterNode" ref="tree">
+                            <span  slot-scope="{node, data}">
+                                <span>{{data.no}} {{data.label}}</span>
                                 <span v-if="curChapter2PermissionMap.get(data.id) == 4" style="color: green;">(可试看)</span>
-                                <span v-else-if="curChapter2PermissionMap.get(data.id) <= userRoleId" style="color: red;">(vip)</span>
+                                <span v-else-if="curChapter2PermissionMap.get(data.id) <= userRoleId" style="color: pink;">(vip)</span>
                             </span>
                         </el-tree>
                 </el-aside>
-                <el-main>
+                <el-main class="el-main"  style="height: 100vh;">
                     <div class="htmlView" v-html="htmlView">
+                    </div>
+    <el-divider></el-divider>
+                    <div style="display: flex; justify-content: space-between;">
+                        <div>
+<el-button type="text">上一篇：</el-button>
+<span>天下大同</span>
+                        </div>
+                        <div>
+<el-button type="text">下一篇：</el-button>
+                        </div>
                     </div>
                 </el-main>
 
-                <el-aside width="auto">
+                <el-aside width="auto" v-bind:style="{'background-color': variables.menuBackground, 'margin-bottom': '0px'}">
+                    <div style="display: flex; justify-content: space-between;">
+                        <div>
+                        <el-input
+                            size="mini"
+  placeholder="请输入文章名后回车"
+  v-model="paperSearch"
+  clearable>
+</el-input>
+                        </div>
+                        <!--
+                        <div>
+<el-button type="text">搜索</el-button>
+                        </div>
+                        -->
+                    </div>
+                    <div>
                     <ul>
-                        <li v-on:click="toPaper(item)" v-for="item in paper">
-                        <el-link>{{item.title.replace('.html', '.md')}}</el-link>
+                        <li v-on:click="toPaper(item,index)" v-for="item,index in paper">
+                        <a class="el-link" style="color: rgb(191, 203, 217);">
+                        <span :class="{active:currentIndex === index}">
+{{item.title.replace('.html', '.md')}}
+                        </span>
+                        </a>
                         </li>
-                        </ul>
+                     </ul>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+  <el-button size="mini" type="primary" icon="el-icon-arrow-left">上一页</el-button>
+  <el-button size="mini" type="primary">下一页<i class="el-icon-arrow-right el-icon--right"></i></el-button>
+                    </div>
+
 
                 </el-aside>
+
 
             </el-container>
         </el-container>
@@ -65,9 +152,41 @@ import { listMenu } from "../../../api/system/menu";
 
 import request from '../../../utils/request'
 
+import { mapGetters, mapState } from "vuex";
+import SidebarItem from "./SidebarItem.vue";
+import variables from "../../../assets/styles/variables.scss";
+
 export default {
+    components: { SidebarItem },
+    computed: {
+        ...mapState(["settings"]),
+        ...mapGetters(["sidebarRouters", "sidebar"]),
+        activeMenu() {
+            const route = this.$route;
+            const { meta, path } = route;
+            // if set path, the sidebar will highlight the path you set
+            if (meta.activeMenu) {
+                return meta.activeMenu;
+            }
+            return path;
+        },
+        variables() {
+            return variables;
+        },
+        isCollapse() {
+            return !this.sidebar.opened;
+        }
+    },
+    watch: {
+      filterChapter(val) {
+        this.$refs.tree.filter(val);
+      }
+    },
     data() {
         return {
+            filterChapter: "",
+            paperSearch: "",
+            currentIndex: 0,
             chapterNo: "",
             userRoleId: 999999,//反正一个超大的数即可
             paper: [],
@@ -144,6 +263,13 @@ export default {
         await this.updateCurPage()
     },
     methods: {
+      filterNode(value, data) {
+        if (!value) return true;
+        return data.label.indexOf(value) !== -1;
+      },
+        change(index) {
+            this.currentIndex = index
+        },
         async getUserRoleId() {
             let that = this
             request({
@@ -548,7 +674,8 @@ export default {
                 }
             });
         },
-        async toPaper(item) {
+        async toPaper(item,index) {
+            this.currentIndex = index;//改变span颜色用
             this.curArticleTitle = item.title.substring(0, item.title.length - 5)
             await this.getChaptersPermissions(item.articleId)
             await this.getArticleMenu(item.articleId)
@@ -560,9 +687,39 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-@import '../../../assets/md.css'
+@import '../../../assets/md_dark.css'
+
 </style>
 <style>
+
+/*改变el-tree css样式*/
+.el-tree-node:focus > .el-tree-node__content {
+  background-color: rgb(48, 65, 86) !important;
+  color: rgb(64, 158, 255) !important;
+}
+.el-tree-node__content:hover {
+  background-color: rgb(38, 52, 69);
+}
+
+/* 鼠标失去焦点时节点背景的颜色 */
+.el-tree--highlight-current .el-tree-node.is-current>.el-tree-node__content{
+  color: rgb(191, 203, 217) !important;
+}
+
+/* md内容隐藏滚动条 并且滚动效果不失效 兼容浏览器写法 */
+.el-main {
+    overflow-y: scroll;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;  /* IE 10+ */
+}
+.el-main::-webkit-scrollbar { /* WebKit */
+    width: 0;
+    height: 0;
+}
+
+.active {
+    color: #00aeff;
+}
 
 .file {
     position: relative;

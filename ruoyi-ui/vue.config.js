@@ -45,11 +45,13 @@ module.exports = {
     disableHostCheck: true
   },
   css: {
-    loaderOptions: {
-      sass: {
-        sassOptions: { outputStyle: "expanded" }
-      }
-    }
+    //loaderOptions: {
+    //  sass: {
+    //    sassOptions: { outputStyle: "expanded" }
+    //  }
+    //}
+    extract: false,
+    sourceMap: false
   },
   configureWebpack: {
     name: name,
