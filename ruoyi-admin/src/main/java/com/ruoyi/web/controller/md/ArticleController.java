@@ -27,8 +27,13 @@ import com.ruoyi.common.core.domain.entity.SysRole;
 import com.ruoyi.common.core.domain.model.LoginUser;
 import com.ruoyi.common.utils.SecurityUtils;
 
+
+import com.ruoyi.common.core.controller.BaseController;
+import com.ruoyi.common.core.domain.AjaxResult;
+import com.ruoyi.common.core.page.TableDataInfo;
+
 @RestController
-public class ArticleController {
+public class ArticleController extends BaseController {
 
     @Autowired
     private IArticleService articleService;
@@ -39,11 +44,11 @@ public class ArticleController {
         return articleService.saveArticle(json);
     }
 
-
-
     @RequestMapping(value = "/paper", method= RequestMethod.GET)
-    public List<Paper> selectArticleList() {
-        return articleService.selectArticleList();
+    public TableDataInfo selectArticleList(Paper paper) {
+        startPage();//此函数里面会自动处理前端传过来的pageNum和pageSize参数
+        List<Paper> list = articleService.selectArticleList(paper);
+        return getDataTable(list);
     }
 
     @RequestMapping(value = "/articleMenu/{articleId}", method= RequestMethod.GET)
@@ -73,4 +78,17 @@ public class ArticleController {
 
         return permission;
     }
+
+    //查询上一篇文章
+    @RequestMapping(value = "/paper/prePaper/{articleId}", method= RequestMethod.GET)
+    public Paper selectPrePaper(@PathVariable("articleId") int articleId) {
+        return articleService.selectPrePaper(articleId);
+    }
+    
+    //查询下一篇文章
+    @RequestMapping(value = "/paper/nextPaper/{articleId}", method= RequestMethod.GET)
+    public Paper selectNextPaper(@PathVariable("articleId") int articleId) {
+        return articleService.selectNextPaper(articleId);
+    }
+
 }

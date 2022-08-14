@@ -85,8 +85,8 @@ public class ArticleServiceImpl implements IArticleService
 
 
     @Override
-    public List<Paper> selectArticleList() {
-        return articleMapper.selectArticleList();
+    public List<Paper> selectArticleList(Paper paper) {
+        return articleMapper.selectArticleList(paper);
     }
 
     @Override
@@ -120,6 +120,27 @@ public class ArticleServiceImpl implements IArticleService
         parameters.put("permission", permission);
 
         return articleMapper.selectChapterContent(parameters);
+    }
+
+
+    @Override
+    public int updatePaper(Paper paper) {
+        return articleMapper.updatePaper(paper);
+    }
+
+    @Override
+    public int deletePaperByIds(Integer[] articleIds)
+    {
+        return articleMapper.deletePaperByIds(articleIds);
+    }
+
+    @Override
+    public Paper selectPrePaper(int articleId) {
+        return articleMapper.selectPrePaper(articleId);
+    }
+    @Override
+    public Paper selectNextPaper(int articleId) {
+        return articleMapper.selectNextPaper(articleId);
     }
 
 }

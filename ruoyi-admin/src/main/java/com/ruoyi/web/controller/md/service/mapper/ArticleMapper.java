@@ -16,9 +16,15 @@ public interface ArticleMapper
     public int insertArticleBatch(List<Article> list);
 
 
-    public List<Paper> selectArticleList();
+    public List<Paper> selectArticleList(Paper paper);
     public ArticleMenu selectArticleMenu(int articleId);
     public List<Article> selectArticleChapterList(int articleId);
 
     public Article selectChapterContent(Map<String, Object> map);
+
+
+    public int updatePaper(Paper paper);
+    public int deletePaperByIds(Integer[] articleIds);
+    public Paper selectPrePaper(int articleId);
+    public Paper selectNextPaper(int articleId);
 }

@@ -23,15 +23,21 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <resultMap type="com.ruoyi.web.controller.md.service.entity.Paper" id="paper">
         <result column="article_id" property="articleId"/>
     </resultMap>
-    <select id="selectArticleList" resultMap = "paper">
+    <select id="selectArticleList" resultMap = "paper" parameterType = "com.ruoyi.web.controller.md.service.entity.Paper">
         select * from article
+        <where>
+		    <if test="title != null and title != ''">
+		    	AND title like concat('%', #{title}, '%')
+		    </if>
+        </where>
+        order by article_id asc
     </select>
 
     <resultMap type="com.ruoyi.web.controller.md.service.entity.ArticleMenu" id="articleMenu">
         <result column="article_id" property="articleId"/>
     </resultMap>
     <select id="selectArticleMenu" resultMap = "articleMenu">
-        select * from article_menu where id = #{articleId}
+        select * from article_menu where article_id = #{articleId}
     </select>
 
     <resultMap type="com.ruoyi.web.controller.md.service.entity.Article" id="chapters">
@@ -49,6 +55,27 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
     <select id="selectChapterContent" resultMap = "content" parameterType = "map">
         select content, no from article_chapter where article_id = #{articleId} and chapter_id = #{chapterId} and permission >= #{permission}
+    </select>
+
+
+
+    <update id="updatePaper" parameterType = "com.ruoyi.web.controller.md.service.entity.Paper">
+        update article set title=#{title} where article_id = #{articleId};
+    </update>
+
+
+ 	<delete id="deletePaperByIds" parameterType="Integer">
+ 		delete from article where article_id in
+ 		<foreach collection="array" item="articleId" open="(" separator="," close=")">
+ 			#{articleId}
+        </foreach> 
+ 	</delete>
+
+    <select id="selectPrePaper" resultMap = "paper">
+        select * from article where article_id = (select article_id from article where article_id &lt; #{articleId} order by article_id desc limit 1);
+    </select>
+    <select id="selectNextPaper" resultMap = "paper">
+        select * from article where article_id = (select article_id from article where article_id &gt; #{articleId} order by article_id asc limit 1);
     </select>
 
 </mapper> 

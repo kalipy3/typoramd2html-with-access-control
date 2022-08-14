@@ -31,8 +31,13 @@ import Layout from '@/layout'
 // 公共路由
 export const constantRoutes = [
   {
-    path: '/system/article',
+    path: '/article',
     component: () => import('../views/system/md/article.vue'),
+    hidden: true
+  },
+  {
+    path: '/system/article-manager',
+    component: () => import('../views/system/md/articleManager.vue'),
     hidden: true
   },
   {

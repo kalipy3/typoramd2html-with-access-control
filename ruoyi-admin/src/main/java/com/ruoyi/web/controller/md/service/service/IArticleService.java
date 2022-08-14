@@ -15,9 +15,16 @@ public interface IArticleService
     public int saveArticle(JSONObject json);
 
 
-    public List<Paper> selectArticleList();
+    public List<Paper> selectArticleList(Paper paper);
     public ArticleMenu selectArticleMenu(int articleId);
     public List<Article> selectArticleChapterList(int articleId);
 
     public Article selectChapterContent(int articleId, int chapterId);
+
+    public int updatePaper(Paper paper);
+
+    public int deletePaperByIds(Integer[] articleIds);
+
+    public Paper selectPrePaper(int articleId);
+    public Paper selectNextPaper(int articleId);
 }

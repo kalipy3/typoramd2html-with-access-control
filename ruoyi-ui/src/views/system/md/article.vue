@@ -78,12 +78,13 @@
                     </div>
     <el-divider></el-divider>
                     <div style="display: flex; justify-content: space-between;">
-                        <div>
-<el-button type="text">上一篇：</el-button>
-<span>天下大同</span>
+                        <div v-if="preArticleId > 0">
+                            <el-button type="text" v-on:click="toPrePaper(preArticleId)">上一篇：</el-button>
+                            <span>{{preArticleTitle}}</span>
                         </div>
-                        <div>
-<el-button type="text">下一篇：</el-button>
+                        <div v-if="nextArticleId > 0">
+<el-button type="text" v-on:click="toNextPaper(nextArticleId)">下一篇：</el-button>
+                            <span>{{nextArticleTitle}}</span>
                         </div>
                     </div>
                 </el-main>
@@ -91,10 +92,10 @@
                 <el-aside width="auto" v-bind:style="{'background-color': variables.menuBackground, 'margin-bottom': '0px'}">
                     <div style="display: flex; justify-content: space-between;">
                         <div>
-                        <el-input
+                        <el-input @change="getPaperByPage"
                             size="mini"
   placeholder="请输入文章名后回车"
-  v-model="paperSearch"
+  v-model="queryParams.title"
   clearable>
 </el-input>
                         </div>
@@ -116,8 +117,8 @@
                      </ul>
                     </div>
                     <div style="display: flex; justify-content: space-between;">
-  <el-button size="mini" type="primary" icon="el-icon-arrow-left">上一页</el-button>
-  <el-button size="mini" type="primary">下一页<i class="el-icon-arrow-right el-icon--right"></i></el-button>
+  <el-button size="mini" type="primary" icon="el-icon-arrow-left" v-on:click="prePage">上一页</el-button>
+  <el-button size="mini" type="primary" v-on:click="nextPage">下一页<i class="el-icon-arrow-right el-icon--right"></i></el-button>
                     </div>
 
 
@@ -184,13 +185,26 @@ export default {
     },
     data() {
         return {
+            // 查询参数
+            queryParams: {
+              pageNum: 1,
+              pageSize: 10,
+              title: undefined
+            },
+            total: 0,
+            curPageNum: 1,
+            l:null,
             filterChapter: "",
             paperSearch: "",
             currentIndex: 0,
             chapterNo: "",
             userRoleId: 999999,//反正一个超大的数即可
             paper: [],
-            curArticleId: 1,
+            preArticleId: -1,
+            nextArticleId: -1,
+            preArticleTitle: "",
+            nextArticleTitle: "",
+            curArticleId: -1,
             curArticleTitle: "",
             curChapter2PermissionMap: new Map(),
             articleName: "",
@@ -259,10 +273,32 @@ export default {
         };
     },
     async mounted() {
+        //@import 
+        this.l = await this.createCssLink('../../../../md_dark.css')
         await this.getUserRoleId()
         await this.updateCurPage()
+        await this.selectPrePaper(this.curArticleId)
+        await this.selectNextPaper(this.curArticleId)
+    },
+    destroyed() {
+        console.log("dedddd"+this.l)
+        this.l.href = ""
     },
     methods: {
+createCssLink(data) {
+
+const link = document.createElement('link')
+
+link.type = 'text/css'
+
+link.rel = 'stylesheet'
+
+link.href = data
+
+document.head.appendChild(link)
+    return link
+
+    },
       filterNode(value, data) {
         if (!value) return true;
         return data.label.indexOf(value) !== -1;
@@ -283,13 +319,15 @@ export default {
         async updateCurPage() {
             //显示第一篇文章
             let res = await this.getPaper()
-            if (res == undefined || res.length == 0) {
+            if (res.code != 200) {
                 this.data = []
                 this.paper = []
                 return;
             }
             this.isShow = true
-            this.paper = res
+            this.paper = res.rows
+            this.total = res.total
+            this.curArticleId = this.paper[0].articleId
             await this.getChaptersPermissions(this.paper[0].articleId)
             await this.getArticleMenu(this.paper[0].articleId)
             await this.getChapterContent(this.paper[0].articleId, 1)
@@ -620,6 +658,31 @@ export default {
               method: 'get'
             });
         },
+        getPaperByPage() {
+            return request({
+              url: '/paper/list',
+              method: 'get',
+              params: this.queryParams
+            }).then(response => {
+              this.paper = response.rows;
+              this.total = response.total;
+            }
+          );
+        },
+        async prePage(){
+            this.queryParams = {
+                pageNum: this.curPageNum - 1 > 0 ? this.curPageNum - 1 : this.curPageNum,
+              pageSize: 10
+            }
+            await this.getPaperByPage();
+        },
+        async nextPage(){
+            this.queryParams = {
+                pageNum: this.curPageNum + 1 > this.total / 10 ? this.curPageNum : this.curPageNum + 1,
+              pageSize: 10
+            }
+            await this.getPaperByPage();
+        },
         getArticleMenu(articleId) {
             let that = this
             that.curArticleId = articleId
@@ -680,6 +743,62 @@ export default {
             await this.getChaptersPermissions(item.articleId)
             await this.getArticleMenu(item.articleId)
             await this.getChapterContent(item.articleId, 1)
+
+            await this.selectPrePaper(this.curArticleId)
+            await this.selectNextPaper(this.curArticleId)
+        },
+
+        async selectPrePaper(articleId) {
+            let that = this
+            console.log(articleId)
+            return request({
+              url: '/paper/prePaper/' + articleId,
+              method: 'get'
+            }).then(response => {
+                console.log("selectPrePaper() resp:"+ response)
+                if (response == null || response.length == 0)
+                    that.preArticleId = -999;
+                else
+                {
+                    that.preArticleTitle = response.title
+                    that.preArticleId = response.articleId
+                }
+            });;
+        },
+        async selectNextPaper(articleId) {
+            let that = this
+            console.log(articleId)
+            return request({
+              url: '/paper/nextPaper/' + articleId,
+              method: 'get'
+            }).then(response => {
+                console.log("selectNextPaper() resp:"+ response.articleId)
+                if (response == null || response.length == 0)
+                    that.nextArticleId = -999;
+                else
+                {
+                    that.nextArticleTitle = response.title
+                    that.nextArticleId = response.articleId
+                }
+            });;
+        },
+        async toPrePaper() {
+            this.currentIndex--;//改变span颜色用
+            await this.getChaptersPermissions(this.preArticleId)
+            await this.getArticleMenu(this.preArticleId)
+            await this.getChapterContent(this.preArticleId, 1)
+
+            await this.selectPrePaper(this.curArticleId)
+            await this.selectNextPaper(this.curArticleId)
+        },
+        async toNextPaper() {
+            this.currentIndex++;//改变span颜色用
+            await this.getChaptersPermissions(this.nextArticleId)
+            await this.getArticleMenu(this.nextArticleId)
+            await this.getChapterContent(this.nextArticleId, 1)
+
+            await this.selectPrePaper(this.curArticleId)
+            await this.selectNextPaper(this.curArticleId)
         }
     }
 };
@@ -687,7 +806,6 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-@import '../../../assets/md_dark.css'
 
 </style>
 <style>
