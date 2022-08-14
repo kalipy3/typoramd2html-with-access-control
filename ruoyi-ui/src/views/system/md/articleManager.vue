@@ -41,6 +41,7 @@
               v-hasPermi="['system:user:import']"
             >上传</el-button>
           </el-col>
+          <!--
           <el-col :span="1.5">
             <el-button
               type="warning"
@@ -50,7 +51,7 @@
               @click="handleExport"
               v-hasPermi="['system:user:export']"
             >下载</el-button>
-          </el-col>
+          </el-col>-->
           <el-col :span="1.5">
             <el-button
               type="danger"
@@ -68,12 +69,15 @@
         <el-table v-loading="loading" :data="paperList" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="50" align="center" />
           <el-table-column label="文章编号" align="center" key="articleId" prop="articleId" v-if="columns[0].visible" />
-          <el-table-column label="文章名" align="center" key="title" prop="title" v-if="columns[1].visible" :show-overflow-tooltip="true" />
+              <el-table-column label="文章名" align="center" key="title" v-if="columns[1].visible" :show-overflow-tooltip="true">
+                      <template slot-scope="scope">{{scope.row.title.substring(0, scope.row.title.length - 5)}}</template>
+              <!--
           <el-table-column label="创建时间" align="center" prop="createTime" v-if="columns[2].visible" width="160">
             <template slot-scope="scope">
               <span>{{ parseTime(scope.row.createTime) }}</span>
             </template>
-          </el-table-column>
+              -->
+             </el-table-column>
           <el-table-column
             label="操作"
             align="center"
@@ -144,11 +148,15 @@
         <i class="el-icon-upload"></i>
         <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
         <div class="el-upload__tip text-center" slot="tip">
+            <!--
           <div class="el-upload__tip" slot="tip">
             <el-checkbox v-model="upload.updateSupport" /> 是否更新已经存在的用户数据
           </div>
+            -->
           <span>仅允许上传zip文件。</span>
+          <!--
           <el-link type="primary" :underline="false" style="font-size:12px;vertical-align: baseline;" @click="importTemplate">下载模板</el-link>
+          -->
         </div>
       </el-upload>
       <div slot="footer" class="dialog-footer">
@@ -171,6 +179,8 @@ export default {
   components: { },
   data() {
     return {
+        ruoyiImgPath: null,
+        preFile: null,
         articleName: "",
         adapterData: [],
       // 遮罩层
@@ -314,7 +324,7 @@ export default {
       //});
         this.form = {
           articleId: articleId,
-          title: title
+          title: title.substring(0, title.length - 5)//去掉.html后缀
         };
         this.open = true;
         this.title = "修改文章";
@@ -324,12 +334,21 @@ export default {
         let that = this
       this.$refs["form"].validate(valid => {
         if (valid) {
-        console.log(that.form)
+            let form = {
+              articleId: that.form.articleId,
+              title: that.form.title + ".html"
+            };
+            console.log(form)
           if (this.form.articleId != undefined) {
-            that.updatePaper(this.form).then(response => {
+            that.updatePaper(form).then(response => {
               this.$modal.msgSuccess("修改成功");
               this.open = false;
-              this.getList();
+              that.getList();
+            }, error => {
+             if (error.code != 200) {
+                 this.$message.error('修改失败 请检查文件名是否重名!');
+                 return;
+             }
             });
           }
         }
@@ -370,24 +389,43 @@ export default {
         console.log("上传中")
     },
     // 文件上传成功处理
-    handleFileSuccess(response, file, fileList) {
+    async handleFileSuccess(response, file, fileList) {
+    let that = this;
       this.upload.open = false;
       this.upload.isUploading = false;
       this.$refs.upload.clearFiles();
-      this.$alert("<div style='overflow: auto;overflow-x: hidden;max-height: 70vh;padding: 10px 20px 0;'>" + response.msg + "</div>", "上传结果", { dangerouslyUseHTMLString: true });
-      this.getList();
+        if (response.code != 200) {
+                this.$message({
+                  message: '失败！请检测文件名是否重复！',
+                  type: 'error'
+                });
+            return;
+        }
+
+        that.ruoyiImgPath = response.filePath.substring(response.filePath.lastIndexOf("/") , response.filePath.length)
+        console.log("9999999999999:"+that.ruoyiImgPath)
+        await this.uploadFile()
+
+      //this.$alert("<div style='overflow: auto;overflow-x: hidden;max-height: 70vh;padding: 10px 20px 0;'>" + response.msg + "</div>", "上传结果", { dangerouslyUseHTMLString: true });
+
+
+      //this.getList();
     },
     // 提交上传文件
     submitFileForm() {
       this.$refs.upload.submit();
     },
     uploadFilePrepare(file) {
+        this.preFile = file
+    },
+    async uploadFile() {
+        let file = this.preFile
         let that = this
         console.log("上传前")
         let jszip = new jsZip();
         console.log(file.name)
     
-        jszip.loadAsync(file).then((zip) => { // 读取zip
+        await jszip.loadAsync(file).then(async (zip) => { // 读取zip
             for (let key in zip.files) { 
                 // 判断是否是目录
                 if (!zip.files[key].dir) {
@@ -395,9 +433,9 @@ export default {
                     if (/\.(html)$/.test(zip.files[key].name)) { 
                         let base = zip.file(zip.files[key].name).async(
         'string') // 以字符串形式输出文本内容
-                        base.then(res => {
+                        return base.then(async res => {
                             that.articleName = zip.files[key].name
-                            that.parseHtml(res, file.name.substring(0, file.name.length - 4))//typora-html2md.zip
+                            await that.parseHtml(res, file.name.substring(0, file.name.length - 4))//typora-html2md.zip
                         })
                     }
                 } else {//是目录
@@ -409,7 +447,8 @@ export default {
         async parseHtml(dataStr, htmlFileName) {
             //http://127.0.0.1:9999/profile/upload/typora-html2md/img/http.png
             //http://127.0.0.1:8088/profile/upload/typora-html2md/img/http.png
-            let imgPath = "./profile/upload/" + htmlFileName + "/img"//若依后端文件上传的路径
+            //let imgPath = "./profile/upload/" + htmlFileName + "/img"//若依后端文件上传的路径
+            let imgPath = "./profile/upload" + this.ruoyiImgPath + "/img"//若依后端文件上传的路径
             dataStr = dataStr.replace(/img src=\"\.\/img/g, 'img src="' + imgPath)
 
             //let reg = /<div id='write'  class=''>(.*?)<\/div>\n<\/body>/igs
@@ -458,6 +497,7 @@ export default {
             this.adapter2(result)
             this.adapterData = result
             await this.addArticle()
+
         },
         adapterNoContent() {
             let data = this.adapterData
@@ -646,9 +686,21 @@ export default {
             }).then(response => {
                 console.log("yyyyyyyyyyyyyy "+response)
                 if (response == 0)
+                {
+                    this.$alert("<div style='overflow: auto;overflow-x: hidden;max-height: 70vh;padding: 10px 20px 0;'>" + "上传成功" + "</div>", "上传结果", { dangerouslyUseHTMLString: true });
+                    that.getList()
                     console.log("上传成功")
-                if (response != 0)
-                    that.$refs.upload.abort();//取消上传
+                }
+                //if (response.code == 500) {//sql出错这里将执行不到
+                //    console.log("请检查文件名是否重名!")
+                //}
+                //if (response != 0)
+                //{
+                //    this.$message.error('请检查文件名是否重名!');
+                //    that.$refs.upload.abort();//取消上传
+                //}
+            }, error => {
+                that.$message.error('失败！请检查文件名是否重名!');
             });
         },
   }

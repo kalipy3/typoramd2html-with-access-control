@@ -670,17 +670,39 @@ document.head.appendChild(link)
           );
         },
         async prePage(){
+            console.log(this.queryParams)
             this.queryParams = {
-                pageNum: this.curPageNum - 1 > 0 ? this.curPageNum - 1 : this.curPageNum,
+                pageNum: (this.curPageNum - 1 > 0) ? (this.curPageNum - 1) : this.curPageNum,
               pageSize: 10
             }
+            console.log("prePage q:"+ this.queryParams)
+            console.log("curPageNum:"+this.curPageNum)
+            if (this.queryParams.pageNum == this.curPageNum) {
+                //已是首页
+                this.$message({
+                  message: '已是首页',
+                  type: 'success'
+                });
+                return;
+            }
+            this.curPageNum--;
             await this.getPaperByPage();
         },
         async nextPage(){
             this.queryParams = {
-                pageNum: this.curPageNum + 1 > this.total / 10 ? this.curPageNum : this.curPageNum + 1,
-              pageSize: 10
+                pageNum: Math.ceil(this.curPageNum < this.total / 10) ? (this.curPageNum + 1) : this.curPageNum,
+                pageSize: 10
             }
+            console.log("nextPage q:"+ this.queryParams)
+            console.log("curPageNum:"+this.curPageNum)
+            if (this.queryParams.pageNum == this.curPageNum) {
+                this.$message({
+                  message: '已是最后一页',
+                  type: 'success'
+                });
+                return;
+            }
+            this.curPageNum++;
             await this.getPaperByPage();
         },
         getArticleMenu(articleId) {

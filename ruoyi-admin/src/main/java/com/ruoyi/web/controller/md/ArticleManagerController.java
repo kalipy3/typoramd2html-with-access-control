@@ -105,7 +105,13 @@ public class ArticleManagerController extends BaseController {
 
             // 上传并返回新文件名称
             //String fileName = FileUploadUtils.upload(filePath, file);
-            String fileName = UnPackeUtil.uploadPack(file, filePath + "/" + file.getOriginalFilename().substring(0, file.getOriginalFilename().length() - 4));
+            String[] ret = UnPackeUtil.uploadPack(file, filePath);
+            String fileName = ret[0];
+            filePath = ret[1];
+            if (fileName == null) {
+                return AjaxResult.error("失败！zip包名重复！");
+            }
+
             fileName += ".zip";
 
             fileName = FileUploadUtils.getPathFileName(filePath, fileName);
@@ -114,8 +120,9 @@ public class ArticleManagerController extends BaseController {
             AjaxResult ajax = AjaxResult.success();
             ajax.put("url", url);
             ajax.put("fileName", fileName);
+            ajax.put("filePath", filePath);
             //ajax.put("newFileName", FileUtils.getName(fileName));
-            ajax.put("newFileName", fileName);
+            //ajax.put("newFileName", fileName);
             ajax.put("originalFilename", file.getOriginalFilename());
             return ajax;
         }

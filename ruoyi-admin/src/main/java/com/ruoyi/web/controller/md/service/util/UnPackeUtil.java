@@ -13,6 +13,9 @@ import java.io.IOException;
 import org.springframework.web.multipart.MultipartFile;
 
 
+import com.ruoyi.common.utils.uuid.Seq;
+
+
 public class UnPackeUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(UnPackeUtil.class);
@@ -90,14 +93,20 @@ public class UnPackeUtil {
     private final static String ZIP_FILE = "application/zip";
     private final static String RAR_FILE = "application/vnd.rar";
 
-    public static String uploadPack(MultipartFile uploadFile, String destPath) {
+    public static String[] uploadPack(MultipartFile uploadFile, String filePath) {
         boolean isZipPack = true;
+        String destPath = filePath + "/" + uploadFile.getOriginalFilename().substring(0, uploadFile.getOriginalFilename().length() - 4);
 
-        //不存在则创建
         File packFile = new File(destPath);
-        if (!packFile.exists()) {
-            boolean mkdirs = packFile.mkdirs();
+        
+        if (packFile.exists()) {
+            //return null;
+            //UnPackeUtil.uploadPack(file, filePath + "/" + file.getOriginalFilename().substring(0, file.getOriginalFilename().length() - 4), file.getOriginalFilename().substring(0, file.getOriginalFilename().length() - 4));
+            destPath = filePath + "/" + uploadFile.getOriginalFilename().substring(0, uploadFile.getOriginalFilename().length() - 4) + "_" + Seq.getId(Seq.uploadSeqType);
+            packFile = new File(destPath);
         }
+
+        boolean mkdirs = packFile.mkdirs();
 
         if (uploadFile== null) {
             throw new RuntimeException("请上传文件");
@@ -137,7 +146,7 @@ public class UnPackeUtil {
         //可以根据解压路径、压缩包名称、文件名称，取出对应文件进行操作
         //
         
-        return filename;
+        return new String[] {filename, destPath};
     }
 }
 
