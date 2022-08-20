@@ -31,7 +31,8 @@ public class UnPackeUtil {
         try {
             ZipFile zip = new ZipFile(zipFile);
             /*zip4j默认用GBK编码去解压,这里设置编码为GBK的*/
-            zip.setFileNameCharset("utf-8");
+            //zip.setFileNameCharset("utf-8");
+            zip.setFileNameCharset("gbk");
             logger.info("begin unpack zip file....");
             zip.extractAll(destPath);
             // 如果解压需要密码
@@ -115,7 +116,8 @@ public class UnPackeUtil {
         String filename = uploadFile.getOriginalFilename();
         //将压缩包保存在指定路径
         String packFilePath = destPath + File.separator + filename;
-        if (ZIP_FILE.equals(contentType)) {
+        //if (ZIP_FILE.equals(contentType)) {
+        if (1 == 1) {
             //zip解压缩处理
         } else if (RAR_FILE.equals(contentType)) {
             //rar解压缩处理

@@ -153,7 +153,7 @@
             <el-checkbox v-model="upload.updateSupport" /> 是否更新已经存在的用户数据
           </div>
             -->
-          <span>仅允许上传zip文件。</span>
+          <span>仅允许上传zip文件(不同zip压缩包名字可以重复，不同zip压缩包内的文章名不能重复)</span>
           <!--
           <el-link type="primary" :underline="false" style="font-size:12px;vertical-align: baseline;" @click="importTemplate">下载模板</el-link>
           -->
@@ -448,8 +448,11 @@ export default {
             //http://127.0.0.1:9999/profile/upload/typora-html2md/img/http.png
             //http://127.0.0.1:8088/profile/upload/typora-html2md/img/http.png
             //let imgPath = "./profile/upload/" + htmlFileName + "/img"//若依后端文件上传的路径
-            let imgPath = "./profile/upload" + this.ruoyiImgPath + "/img"//若依后端文件上传的路径
-            dataStr = dataStr.replace(/img src=\"\.\/img/g, 'img src="' + imgPath)
+            let imgPath = "./profile/upload" + this.ruoyiImgPath + "/images"//若依后端文件上传的路径
+            console.log("00000000000000000000000000:"+imgPath)
+            //适配./images 和images开头都可以
+            dataStr = dataStr.replace(/img src=\"images/g, 'img src="' + imgPath)
+            dataStr = dataStr.replace(/img src=\"\.\/images/g, 'img src="' + imgPath)
 
             //let reg = /<div id='write'  class=''>(.*?)<\/div>\n<\/body>/igs
             let reg = /<div id='write'  class=' first-line-indent'>(.*?)<\/div>\n<\/body>/igs
@@ -700,7 +703,7 @@ export default {
                 //    that.$refs.upload.abort();//取消上传
                 //}
             }, error => {
-                that.$message.error('失败！请检查文件名是否重名!');
+                that.$message.error('失败！zip压缩包内的文章名和云端重复!');
             });
         },
   }

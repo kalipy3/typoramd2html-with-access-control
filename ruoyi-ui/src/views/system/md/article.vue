@@ -80,11 +80,11 @@
                     <div style="display: flex; justify-content: space-between;">
                         <div v-if="preArticleId > 0">
                             <el-button type="text" v-on:click="toPrePaper(preArticleId)">上一篇：</el-button>
-                            <span>{{preArticleTitle}}</span>
+                            <span>{{preArticleTitle.replace('.html', '.md')}}</span>
                         </div>
                         <div v-if="nextArticleId > 0">
 <el-button type="text" v-on:click="toNextPaper(nextArticleId)">下一篇：</el-button>
-                            <span>{{nextArticleTitle}}</span>
+                            <span>{{nextArticleTitle.replace('.html', '.md')}}</span>
                         </div>
                     </div>
                 </el-main>
