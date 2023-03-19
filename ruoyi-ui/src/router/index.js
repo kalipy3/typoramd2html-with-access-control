@@ -30,14 +30,26 @@ import Layout from '@/layout'
 
 // 公共路由
 export const constantRoutes = [
+  //ruoyi的java后端和ruoyi前端permission.js中自动管理并配置了这些通过在浏览器中若依后台"菜单管理"中配置的菜单//路由，所以这里可以注释掉，不用我们手动配置
+  //{
+  // path就是填写`views/system/md/articleManager.vue`中的`system/md/articleManager`，即.vue文件路径
+  //  path: '/system/md/articleManager',//对应"菜单管理"-->"修改菜单"中的"组件路径"，比如我们在浏览器若依后台菜单管理中的"路由地址"配置为article-manager，则点击或代码中引用tish$router.push(/article-manager)这个路由地址"article-manager"，那么就会自动跳转到articleManager.vue页面
+  //  component: () => import('../views/system/md/articleManager.vue'),
+  //  hidden: true
+  //},
+
+  //但是有一个问题，被若依管理了的菜单被点击后，无法设置成全屏，怎么办？答：自己手动配置路由即可
+  //失败的解决:
+  //{
+  //  path: '/system/md/article',//为什么失败？答：因为我们配置的路由被若依的前端"拦截器"permission.js篡改了
+  //  component: () => import('../views/system/md/article.vue'),
+  //  hidden: true
+  //},
+
+  //成功的解决(在浏览器若依后台"菜单管理"-->"修改菜单"中，"组件路径"不要填写！！，"路由地址"填写为这里的path字段)：
   {
-    path: '/article',
-    component: () => import('../views/system/md/article.vue'),
-    hidden: true
-  },
-  {
-    path: '/system/article-manager',
-    component: () => import('../views/system/md/articleManager.vue'),
+    path: '/test/md/article',//如果想让这个路由被点击后，浏览器新开一个页面打开article.vue页面，可以在"浏览器若依后台的路由地址填写中，加上http/https:ip的前缀"。或者方法二：https://blog.csdn.net/qq_18154987/article/details/127967630
+    component: () => import('../views/test/md/article.vue'),
     hidden: true
   },
   {
