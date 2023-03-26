@@ -47,9 +47,15 @@ export const constantRoutes = [
   //},
 
   //成功的解决(在浏览器若依后台"菜单管理"-->"修改菜单"中，"组件路径"不要填写！！，"路由地址"填写为这里的path字段)：
+  //{
+  //  path: '/test/md/article',//如果想让这个路由被点击后，浏览器新开一个页面打开article.vue页面，可以在"浏览器若依后台的路由地址填写中，加上http/https:ip的前缀"。或者方法二：https://blog.csdn.net/qq_18154987/article/details/127967630
+  //  component: () => import('../views/test/md/article.vue'),
+  //  hidden: true
+  //},
   {
-    path: '/test/md/article',//如果想让这个路由被点击后，浏览器新开一个页面打开article.vue页面，可以在"浏览器若依后台的路由地址填写中，加上http/https:ip的前缀"。或者方法二：https://blog.csdn.net/qq_18154987/article/details/127967630
-    component: () => import('../views/test/md/article.vue'),
+    //path: '/md/article',//不行，文章图片无法展示，请f12查看图片url即知道为什么
+    path: '/article',
+    component: () => import('../views/system/md/article.vue'),
     hidden: true
   },
   {

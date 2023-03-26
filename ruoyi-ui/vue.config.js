@@ -40,7 +40,13 @@ module.exports = {
         pathRewrite: {
           ['^' + process.env.VUE_APP_BASE_API]: ''
         }
-      }
+      },
+        //图片路径配置 请参考若依官方文档 9999是你的若依后端端口号
+        "/profile": {
+            target: `http://127.0.0.1:9999/profile`,
+            changeOrigin: true,
+            pathRewrite: {'^/profile': ''}
+        }
     },
     disableHostCheck: true
   },
